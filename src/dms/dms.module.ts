@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { DmsService } from './dms.service';
-import { DmsController } from './dms.controller';
+import { DMsService } from './dms.service';
+import { DMsController } from './dms.controller';
 
 @Module({
-  providers: [DmsService],
-  controllers: [DmsController]
+  providers: [DMsService],
+  controllers: [DMsController]
 })
-export class DmsModule {}
+export class DMsModule {}

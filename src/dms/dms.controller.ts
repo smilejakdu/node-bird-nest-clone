@@ -5,7 +5,7 @@ import { ApiParam, ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('DM')
 @Controller('api/workspaces/:url/dms')
-export class DmsController {
+export class DMsController {
 	@ApiParam({
 		name: 'url',
 		required: true,
