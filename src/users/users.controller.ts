@@ -29,8 +29,9 @@ export class UsersController {
 
   @ApiOperation({ summary: "회원가입" })
   @Post()
-  postUsers(@Body() body: JoinRequestDto) {
-    this.usersService.postUsers(body.email, body.nickname, body.password);
+  async join(@Body() body: JoinRequestDto) {
+    // await 을 붙이게 되면 this 뒤에 코드에서 에러가 났을시 , return 값이 밭으로 퍼져나오는 효과가 된다.
+    await this.usersService.join(body.email, body.nickname, body.password);
   }
 
   @ApiResponse({

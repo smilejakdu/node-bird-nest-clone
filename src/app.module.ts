@@ -1,3 +1,4 @@
+import { Users } from "./entities/Users";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { AppController } from "./app.controller";
@@ -19,6 +20,7 @@ import * as ormconfig from "../ormconfig";
     ChannelsModule,
     DMsModule,
     TypeOrmModule.forRoot(ormconfig),
+    TypeOrmModule.forFeature([Users]),
   ],
   controllers: [AppController],
   providers: [AppService, UsersService],
