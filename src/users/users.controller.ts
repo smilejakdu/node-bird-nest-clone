@@ -1,5 +1,16 @@
-import { Body, Controller, Get, Post, Req, Res } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from "@nestjs/common";
 import { ApiOperation, ApiResponse, ApiTags } from "@nestjs/swagger";
+import { LocalAuthGuard } from "src/auth/local-auth.guard";
+import { LoggedInGuard } from "src/auth/logged-in.guard";
+import { NotLoggedInGuard } from "src/auth/not-logged-in.guard";
 import { User } from "src/common/decorator/user.decorator";
 import { UserDto } from "src/common/dto/user.dto";
 import { JoinRequestDto } from "./dto/join.request.dto";
@@ -24,9 +35,10 @@ export class UsersController {
   @ApiOperation({ summary: "내정보 조회" }) // swagger 문서 요약 title 을 붙여준다.
   @Get()
   getUsers(@User() user) {
-    return user;
+    return user || false;
   }
 
+  @UseGuards(new NotLoggedInGuard())
   @ApiOperation({ summary: "회원가입" })
   @Post()
   async join(@Body() body: JoinRequestDto) {
@@ -40,11 +52,13 @@ export class UsersController {
     type: UserDto,
   })
   @ApiOperation({ summary: "로그인" })
+  @UseGuards(new LocalAuthGuard()) // 권한을 확인한다.
   @Post("login") // users/login
   logIn(@User() user) {
     return user;
   }
 
+  @UseGuards(new LoggedInGuard())
   @ApiOperation({ summary: "로그아웃" })
   @Post("lgout") // users/logout
   logOut(@Req() req, @Res() res) {

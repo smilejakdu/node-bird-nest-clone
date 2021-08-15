@@ -38,6 +38,8 @@ async function bootstrap() {
       },
     }),
   );
+  // passport 사용한다면 이렇게 두개 넣어줘야한다.
+  // 만약에 jwt 기반으로 하게 된다면 app.use(passport.session()); 을 작성하지 않아도 된다.
   app.use(passport.initialize());
   app.use(passport.session());
   await app.listen(port);

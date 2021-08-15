@@ -11,10 +11,13 @@ import { DMsModule } from "./dms/dms.module";
 import { UsersService } from "./users/users.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import * as ormconfig from "../ormconfig";
+import { AuthModule } from "./auth/auth.module";
 
 @Module({
+  // A -> B -> app.module
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AuthModule,
     UsersModule,
     WorkspacesModule,
     ChannelsModule,

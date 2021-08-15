@@ -44,7 +44,7 @@ export class Users {
 
   @IsString()
   @IsNotEmpty()
-  @Column("varchar", { name: "password", length: 100, select: false })
+  @Column("varchar", { name: "password", length: 100, select: false }) // select: false 하면 password 빼고 불러온다.
   password: string;
 
   @CreateDateColumn()
