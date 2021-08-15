@@ -5,12 +5,14 @@ import cookieParser from "cookie-parser";
 import session from "express-session";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { HttpExceptionFilter } from "./http-exception.filter";
+import { ValidationPipe } from "@nestjs/common";
 
 declare const module: any;
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT || 3000;
+  app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new HttpExceptionFilter());
   // swagger 에 대한 설정 부분이다
   // https://docs.nestjs.com/openapi/introduction

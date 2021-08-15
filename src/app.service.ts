@@ -1,5 +1,5 @@
-import { Injectable } from '@nestjs/common';
-import { UsersService } from './users/users.service';
+import { Injectable } from "@nestjs/common";
+import { UsersService } from "./users/users.service";
 
 /*
   요청 과 응답에 대해서는 몰라요
@@ -8,7 +8,7 @@ import { UsersService } from './users/users.service';
 */
 @Injectable()
 export class AppService {
-  constructor(private usersService : UsersService) { }
+  constructor(private usersService: UsersService) {}
   async getHello() {
     this.usersService.getUser();
     this.getWow();

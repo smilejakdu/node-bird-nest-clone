@@ -15,7 +15,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const status = exception.getStatus();
     const err = exception.getResponse() as
       | string
-      | { error: string; statusCode: 400; message: string[] };
+      | { error: string; statusCode: 400; message: string[] }; // class-validator
     log(status, err);
 
     // let msg = '';
