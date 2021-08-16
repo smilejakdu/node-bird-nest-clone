@@ -1,31 +1,49 @@
-import {
-  BadRequestException,
-  HttpException,
-  Injectable,
-  UnauthorizedException,
-} from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
-import { Users } from "src/entities/Users";
 import bcrypt from "bcrypt";
+import { ChannelMembers } from "../entities/ChannelMembers";
+
+import { Users } from "../entities/Users";
+import { WorkspaceMembers } from "../entities/WorkspaceMembers";
 
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(Users)
-    private usersRepository: Repository<Users>,
+    @InjectRepository(Users) private usersRepository: Repository<Users>,
+    @InjectRepository(WorkspaceMembers)
+    private workspaceMembersRepository: Repository<WorkspaceMembers>,
+    @InjectRepository(ChannelMembers)
+    private channelMembersRepository: Repository<ChannelMembers>,
   ) {}
-  getUser() {}
+
+  async findByEmail(email: string) {
+    return this.usersRepository.findOne({
+      where: { email },
+      select: ["id", "email", "password"],
+    });
+  }
+
   async join(email: string, nickname: string, password: string) {
+    const hashedPassword = await bcrypt.hash(password, 12);
     const user = await this.usersRepository.findOne({ where: { email } });
     if (user) {
-      throw new UnauthorizedException("이미 존재하는 사용자 입니다.");
+      return false;
     }
-    const hashedPassword = await bcrypt.hash(password, 12);
-    await this.usersRepository.save({
+    const returned = await this.usersRepository.save({
       email,
       nickname,
       password: hashedPassword,
     });
+    // 사용자를 만들면서 그 사용자가 바로 워크스페이스에 들어가고 채널에도 들어가게 된다.
+    const workspaceMember = new WorkspaceMembers();
+    workspaceMember.UserId = returned.id;
+    workspaceMember.WorkspaceId = 1;
+    await this.workspaceMembersRepository.save(workspaceMember);
+    const channelMember = new ChannelMembers();
+    channelMember.UserId = returned.id;
+    channelMember.ChannelId = 1;
+    await this.channelMembersRepository.save(channelMember);
+    return true;
   }
 }
