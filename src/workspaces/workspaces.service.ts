@@ -76,4 +76,44 @@ export class WorkspacesService {
         .getMany()
     );
   }
+
+  async createWorkspaceMembers(url, email) {
+    const workspace = await this.workspacesRepository.findOne({
+      where: { url },
+      join: {
+        alias: "workspace",
+        innerJoinAndSelect: {
+          // innerJoin 이랑 innerJoinAndSelect 의 차이점은 AndSelect 까지하게됨녀 Join 한테이블 데이터까지 불러오게 된다.
+          channels: "workspace.Channels",
+        },
+      },
+    });
+    // 만약에 위의 코드를 QueryBuilder 를 사용하게 된다면 ,
+    // this.workspacesRepositry.createQueryBuilder('workspace').innerJoinAndSelect('workspace.Channels' , 'channels').getOne()
+    // QueryBuiler 를 사용하게되면 복잡한 쿼리를 좀더 단순하게 짤수있다는 장점이있다.
+    const user = await this.usersRepository.findOne({ where: { email } });
+    if (!user) {
+      return null;
+    }
+    const workspaceMember = new WorkspaceMembers();
+    workspaceMember.WorkspaceId = workspace.id;
+    workspaceMember.UserId = user.id;
+    await this.workspaceMembersRepository.save(workspaceMember);
+    const channelMember = new ChannelMembers();
+    channelMember.ChannelId = workspace.Channels.find(
+      (v) => v.name === "일반",
+    ).id;
+    channelMember.UserId = user.id;
+    await this.channelMembersRepository.save(channelMember);
+  }
+
+  async getWorkspaceMember(url: string, id: number) {
+    return this.usersRepository
+      .createQueryBuilder("user")
+      .where("user.id = :id", { id }) // where 문을 더 붙이고 싶을때는 andWhere , orWhere 를 사용하면 된다.
+      .innerJoin("user.Workspaces", "workspaces", "workspaces.url = :url", {
+        url,
+      })
+      .getOne();
+  }
 }

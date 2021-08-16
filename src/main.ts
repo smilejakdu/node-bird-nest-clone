@@ -13,6 +13,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const port = process.env.PORT || 3000;
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
+  // npm install class-transformer 설치를해줘야함 => 자동변환
   app.useGlobalFilters(new HttpExceptionFilter());
   // swagger 에 대한 설정 부분이다
   // https://docs.nestjs.com/openapi/introduction
