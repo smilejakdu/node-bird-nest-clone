@@ -1,30 +1,51 @@
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from "./app.module";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import passport from "passport";
 import cookieParser from "cookie-parser";
 import session from "express-session";
-import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
-import { HttpExceptionFilter } from "./http-exception.filter";
+import path from "path";
 import { ValidationPipe } from "@nestjs/common";
+
+import { AppModule } from "./app.module";
+import { HttpExceptionFilter } from "./http-exception.filter";
 
 declare const module: any;
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const port = process.env.PORT || 3000;
-  app.useGlobalPipes(new ValidationPipe({ transform: true }));
-  // npm install class-transformer 설치를해줘야함 => 자동변환
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
   app.useGlobalFilters(new HttpExceptionFilter());
-  // swagger 에 대한 설정 부분이다
-  // https://docs.nestjs.com/openapi/introduction
-  // 공식문서에 너무나도 잘 나와있다.
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+    }),
+  );
+  app.enableCors({
+    origin: true,
+    credentials: true,
+  });
+  app.useStaticAssets(
+    process.env.NODE_ENV === "production"
+      ? path.join(__dirname, "..", "..", "uploads")
+      : path.join(__dirname, "..", "uploads"),
+    {
+      prefix: "/uploads",
+    },
+  );
+  app.useStaticAssets(
+    process.env.NODE_ENV === "production"
+      ? path.join(__dirname, "..", "..", "public")
+      : path.join(__dirname, "..", "public"),
+    {
+      prefix: "/dist",
+    },
+  );
   const config = new DocumentBuilder()
-    .setTitle("Sleact APi clone study")
-    .setDescription("this is API document for Sleact clone develop")
+    .setTitle("Sleact API")
+    .setDescription("Sleact 개발을 위한 API 문서입니다.")
     .setVersion("1.0")
     .addCookieAuth("connect.sid")
     .build();
-
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup("api", app, document);
 
@@ -39,12 +60,12 @@ async function bootstrap() {
       },
     }),
   );
-  // passport 사용한다면 이렇게 두개 넣어줘야한다.
-  // 만약에 jwt 기반으로 하게 된다면 app.use(passport.session()); 을 작성하지 않아도 된다.
   app.use(passport.initialize());
   app.use(passport.session());
-  await app.listen(port);
-  console.log(`listening on port ${port}`);
+
+  const PORT = process.env.PORT || 3095;
+  await app.listen(PORT);
+  console.log(`server listening on port ${PORT}`);
 
   if (module.hot) {
     module.hot.accept();

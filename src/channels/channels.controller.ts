@@ -127,6 +127,21 @@ export class ChannelsController {
       limits: { fileSize: 5 * 1024 * 1024 }, // 5MB
     }),
   )
+  @Post(":url/channels/:name/images")
+  async createWorkspaceChannelImages(
+    @Param("url") url,
+    @Param("name") name,
+    @UploadedFiles() files: Express.Multer.File[],
+    @User() user: Users,
+  ) {
+    return this.channelsService.createWorkspaceChannelImages(
+      url,
+      name,
+      files,
+      user.id,
+    );
+  }
+
   @ApiOperation({ summary: "안 읽은 개수 가져오기" })
   @Get(":url/channels/:name/unreads")
   async getUnreads(

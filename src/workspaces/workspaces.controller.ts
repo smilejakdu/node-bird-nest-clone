@@ -1,11 +1,22 @@
-import { Body, Controller, Delete, Get, Post } from "@nestjs/common";
-import { ApiOperation, ApiTags } from "@nestjs/swagger";
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Post,
+  Body,
+  Param,
+  ParseIntPipe,
+} from "@nestjs/common";
+import { ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { LoggedInGuard } from "../auth/logged-in.guard";
 import { User } from "../decorators/user.decorator";
 import { Users } from "../entities/Users";
 import { CreateWorkspaceDto } from "./dto/create-workspace.dto";
 import { WorkspacesService } from "./workspaces.service";
 
-@ApiTags("WORKSPACE")
+@ApiTags("WORKSPACES")
+@ApiCookieAuth("connect.sid")
+@UseGuards(LoggedInGuard)
 @Controller("api/workspaces")
 export class WorkspacesController {
   constructor(private workspacesService: WorkspacesService) {}
@@ -19,7 +30,6 @@ export class WorkspacesController {
   @ApiOperation({ summary: "워크스페이스 만들기" })
   @Post()
   async createWorkspace(@User() user: Users, @Body() body: CreateWorkspaceDto) {
-    // body 는 dto 로 만들어줘야한다
     return this.workspacesService.createWorkspace(
       body.workspace,
       body.url,
@@ -27,17 +37,36 @@ export class WorkspacesController {
     );
   }
 
+  @ApiOperation({ summary: "워크스페이스 멤버 가져오기" })
   @Get(":url/members")
-  getAllMembersFromWorkspace() {
-    // 네이밍을 할때 길게 적더라도 직관적이게 적어주는것이 좋다.
+  async getWorkspaceMembers(@Param("url") url: string) {
+    return this.workspacesService.getWorkspaceMembers(url);
   }
 
+  @ApiOperation({ summary: "워크스페이스 멤버 초대하기" })
   @Post(":url/members")
-  inviteMembersToWorkspace() {}
+  async createWorkspaceMembers(
+    @Param("url") url: string,
+    @Body("email") email,
+  ) {
+    return this.workspacesService.createWorkspaceMembers(url, email);
+  }
 
-  @Delete(":url/members/:id")
-  kickMemberFromWorkspace() {}
-
+  @ApiOperation({ summary: "워크스페이스 특정멤버 가져오기" })
   @Get(":url/members/:id")
-  getMemberInfoInWorkspace() {}
+  async getWorkspaceMember(
+    @Param("url") url: string,
+    @Param("id", ParseIntPipe) id: number,
+  ) {
+    return this.workspacesService.getWorkspaceMember(url, id);
+  }
+
+  @ApiOperation({ summary: "워크스페이스 특정멤버 가져오기" })
+  @Get(":url/users/:id")
+  async getWorkspaceUser(
+    @Param("url") url: string,
+    @Param("id", ParseIntPipe) id: number,
+  ) {
+    return this.workspacesService.getWorkspaceMember(url, id);
+  }
 }
